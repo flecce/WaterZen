@@ -61,15 +61,15 @@ namespace WaterZen.Telegram.Application.Services.Impl
             if (message.Text is not { } messageText)
                 return;
 
-            //var chatId = message.Chat.Id;
+            var chatId = message.Chat.Id;
 
             //Console.WriteLine($"Received a '{messageText}' message in chat {chatId}.");
 
-            //// Echo received message text
-            //Message sentMessage = await botClient.SendTextMessageAsync(
-            //    chatId: chatId,
-            //    text: "You said:\n" + messageText,
-            //    cancellationToken: cancellationToken);
+            // Echo received message text
+            Message sentMessage = await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Your chat ID:\n" + chatId,
+                cancellationToken: cancellationToken);
         }
 
         Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
