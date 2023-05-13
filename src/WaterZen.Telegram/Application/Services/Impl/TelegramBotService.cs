@@ -12,11 +12,13 @@ namespace WaterZen.Telegram.Application.Services.Impl
     {
         private IConfiguration _configuration;
         private TelegramBotClient? _botClient;
+        private long[] _chatIds;
 
         public TelegramBotService(IConfiguration configuration)
         {
             ArgumentNullException.ThrowIfNull(configuration);
             _configuration = configuration;
+            _chatIds = configuration.GetValue<string>("Telegram:ChatId")?.Split(",").Select(x => Convert.ToInt64(x.Trim())).ToArray();
         }
 
         public async Task Start(CancellationToken cancellationToken)
@@ -46,7 +48,7 @@ namespace WaterZen.Telegram.Application.Services.Impl
 
         private void _initClient()
         {
-            var accessToken = _configuration.GetValue<string>("AccessToken") ?? throw new ArgumentNullException("AccessToken");
+            var accessToken = _configuration.GetValue<string>("Telegram:AccessToken") ?? throw new ArgumentNullException("Telegram:AccessToken");
             _botClient = new TelegramBotClient(accessToken);
         }
 
@@ -59,15 +61,15 @@ namespace WaterZen.Telegram.Application.Services.Impl
             if (message.Text is not { } messageText)
                 return;
 
-            var chatId = message.Chat.Id;
+            //var chatId = message.Chat.Id;
 
-            Console.WriteLine($"Received a '{messageText}' message in chat {chatId}.");
+            //Console.WriteLine($"Received a '{messageText}' message in chat {chatId}.");
 
-            // Echo received message text
-            Message sentMessage = await botClient.SendTextMessageAsync(
-                chatId: chatId,
-                text: "You said:\n" + messageText,
-                cancellationToken: cancellationToken);
+            //// Echo received message text
+            //Message sentMessage = await botClient.SendTextMessageAsync(
+            //    chatId: chatId,
+            //    text: "You said:\n" + messageText,
+            //    cancellationToken: cancellationToken);
         }
 
         Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
@@ -81,6 +83,17 @@ namespace WaterZen.Telegram.Application.Services.Impl
 
             Console.WriteLine(ErrorMessage);
             return Task.CompletedTask;
+        }
+
+        public async Task SendText(string text)
+        {
+            if (_botClient == null)
+            {
+                return;
+            }
+
+            foreach (var chatId in _chatIds)
+                await _botClient.SendTextMessageAsync(chatId, text);
         }
     }
 }

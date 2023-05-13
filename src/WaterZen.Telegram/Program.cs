@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Reflection;
 using WaterZen.Telegram.Application.Services.Impl;
 using WaterZen.Telegram.Application.Services.Interfaces;
 
@@ -25,6 +27,8 @@ namespace WaterZen.Telegram
                 {
                     services.AddHostedService<ConsoleHostedService>();
                     services.AddSingleton<IBotService, TelegramBotService>();
+                    services.AddSingleton<IMQTTService, MQTTService>();
+                    services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
                 });
     }
 
@@ -33,15 +37,18 @@ namespace WaterZen.Telegram
         private readonly ILogger _logger;
         private readonly IHostApplicationLifetime _appLifetime;
         private readonly IBotService _botService;
+        private readonly IMQTTService _mqttService;
 
         public ConsoleHostedService(
             ILogger<ConsoleHostedService> logger,
             IHostApplicationLifetime appLifetime,
-            IBotService botService)
+            IBotService botService,
+            IMQTTService mqttService)
         {
             _logger = logger;
             _appLifetime = appLifetime;
             _botService = botService;
+            _mqttService = mqttService;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -54,6 +61,7 @@ namespace WaterZen.Telegram
                 {
                     try
                     {
+                        await _mqttService.Listen(cancellationToken);
                         await _botService.Start(cancellationToken);
 
                         Console.ReadKey();
