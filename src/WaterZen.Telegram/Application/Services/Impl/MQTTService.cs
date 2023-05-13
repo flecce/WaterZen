@@ -1,9 +1,7 @@
-﻿using MediatR;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using MQTTnet;
 using MQTTnet.Client;
 using System.Text.Json;
-using WaterZen.Telegram.Application.Mediator.Messages;
 using WaterZen.Telegram.Application.Services.Interfaces;
 
 namespace WaterZen.Telegram.Application.Services.Impl
@@ -40,13 +38,16 @@ namespace WaterZen.Telegram.Application.Services.Impl
                     if (data != null)
                     {
                         _showerService.CheckClosingSession();
-                        if (!_showerService.IsSessionActive)
+                        if (!_showerService.IsSessionActive && data.WaterOn)
                         {
                             _showerService.StartSession();
                         }
 
-                        _showerService.AddFlowRate(data.FlowRate);
-                        _showerService.AddTemperature(data.Temperature);
+                        if (data.WaterOn)
+                        {
+                            _showerService.AddFlowRate(data.FlowRate);
+                            _showerService.AddTemperature(data.Temperature);
+                        }
                     }
                 }
 
@@ -69,8 +70,8 @@ namespace WaterZen.Telegram.Application.Services.Impl
         private class DeviceData
         {
             public bool WaterOn { get; set; }
-            public decimal Temperature { get; set; }
-            public decimal FlowRate { get; set; }
+            public double Temperature { get; set; }
+            public double FlowRate { get; set; }
         }
     }
 }

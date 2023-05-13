@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using WaterZen.Telegram.Application.Mediator.Messages;
 
 namespace WaterZen.Telegram.Application.Services
 {
@@ -26,12 +25,12 @@ namespace WaterZen.Telegram.Application.Services
             IsSessionActive = true;
         }
 
-        public void AddFlowRate(decimal flowRate)
+        public void AddFlowRate(double flowRate)
         {
             CurrentShowerSession?.AddFlowRate(flowRate);
         }
 
-        public void AddTemperature(decimal temperature)
+        public void AddTemperature(double temperature)
         {
             CurrentShowerSession?.AddTemperature(temperature);
         }
@@ -46,11 +45,7 @@ namespace WaterZen.Telegram.Application.Services
                     IsSessionActive = false;
                     CurrentShowerSession?.EndSession();
 
-                    _mediator.Send(new WaterData
-                    {
-                        Temperature = CurrentShowerSession.Temperatures.First().Item2,
-                        FlowRate = CurrentShowerSession.FlowRates.First().Item2
-                    });
+                    _mediator.Send(CurrentShowerSession);
                 }
             }
         }

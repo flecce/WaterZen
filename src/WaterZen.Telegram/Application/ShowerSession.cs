@@ -1,12 +1,14 @@
-﻿namespace WaterZen.Telegram.Application
+﻿using MediatR;
+
+namespace WaterZen.Telegram.Application
 {
-    internal class ShowerSession
+    internal class ShowerSession : IRequest<bool>
     {
         public Guid Id { get; private set; }
         public DateTime StartDate { get; private set; }
         public DateTime EndDate { get; private set; }
-        public List<Tuple<DateTime, decimal>> FlowRates { get; set; } = new List<Tuple<DateTime, decimal>>();
-        public List<Tuple<DateTime, decimal>> Temperatures { get; set; } = new List<Tuple<DateTime, decimal>>();
+        public List<Tuple<DateTime, double>> FlowRates { get; set; } = new List<Tuple<DateTime, double>>();
+        public List<Tuple<DateTime, double>> Temperatures { get; set; } = new List<Tuple<DateTime, double>>();
 
         public ShowerSession()
         {
@@ -23,14 +25,14 @@
             EndDate = DateTime.Now;
         }
 
-        public void AddFlowRate(decimal rate)
+        public void AddFlowRate(double rate)
         {
-            FlowRates.Add(new Tuple<DateTime, decimal>(DateTime.Now, rate));
+            FlowRates.Add(new Tuple<DateTime, double>(DateTime.Now, rate));
         }
 
-        public void AddTemperature(decimal temperature)
+        public void AddTemperature(double temperature)
         {
-            Temperatures.Add(new Tuple<DateTime, decimal>(DateTime.Now, temperature));
+            Temperatures.Add(new Tuple<DateTime, double>(DateTime.Now, temperature));
         }
     }
 }

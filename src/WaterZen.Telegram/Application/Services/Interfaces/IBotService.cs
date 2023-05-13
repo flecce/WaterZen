@@ -3,6 +3,6 @@
     internal interface IBotService
     {
         Task Start(CancellationToken cancellationToken);
-        Task SendText(string text);
+        Task SendMessage(ShowerSession session);
     }
 }

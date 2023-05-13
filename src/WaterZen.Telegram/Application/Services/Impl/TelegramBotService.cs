@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
+using System.Collections;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using WaterZen.Telegram.Application.Helpers;
 using WaterZen.Telegram.Application.Services.Interfaces;
 
 namespace WaterZen.Telegram.Application.Services.Impl
@@ -85,15 +87,21 @@ namespace WaterZen.Telegram.Application.Services.Impl
             return Task.CompletedTask;
         }
 
-        public async Task SendText(string text)
+        public async Task SendMessage(ShowerSession session)
         {
             if (_botClient == null)
             {
                 return;
-            }
+            }            
 
-            foreach (var chatId in _chatIds)
-                await _botClient.SendTextMessageAsync(chatId, text);
+            using (Stream stream = new MemoryStream(ChartHelper.CreateGraph(session.Temperatures.Select(x => x.Item2).ToArray())))
+            {
+                foreach (var chatId in _chatIds)
+                {
+                    await _botClient.SendPhotoAsync(chatId, InputFile.FromStream(stream));
+                    //await _botClient.SendTextMessageAsync(chatId, text);
+                }
+            }
         }
     }
 }

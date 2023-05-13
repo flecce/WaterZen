@@ -67,7 +67,7 @@ namespace WaterZenSimulator.Telegram
                         {
                             FlowRate = r.Next(3, 10),
                             Temperature = r.Next(40, 50),
-                            WaterOn = false
+                            WaterOn = true
                         };
                         await _mqttService.SendWaterData(data);
 

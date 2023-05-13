@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
+using WaterZen.Telegram.Application.Helpers;
 using WaterZen.Telegram.Application.Services;
 using WaterZen.Telegram.Application.Services.Impl;
 using WaterZen.Telegram.Application.Services.Interfaces;
