@@ -35,8 +35,6 @@ namespace WaterZenSimulator.Telegram
         private readonly IHostApplicationLifetime _appLifetime;
         private readonly IMQTTService _mqttService;
 
-
-
         public ConsoleHostedService(
             ILogger<ConsoleHostedService> logger,
             IHostApplicationLifetime appLifetime,
