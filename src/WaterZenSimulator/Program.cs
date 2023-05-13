@@ -61,7 +61,6 @@ namespace WaterZenSimulator.Telegram
                     {
                         Console.ReadKey();
                         isOpenWater = !isOpenWater;
-                        _resetOpenWater();
                     }
 
                     if (isOpenWater)
@@ -91,11 +90,6 @@ namespace WaterZenSimulator.Telegram
                     await Task.Delay(500);
                 }
             });
-        }
-
-        private void _resetOpenWater()
-        {
-            
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
