@@ -2,36 +2,23 @@
 using Microsoft.Extensions.Configuration;
 using MQTTnet;
 using MQTTnet.Client;
-using WaterZen.Telegram.Application.Services.Interfaces;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using WaterZen.Telegram.Application.Mediator.Messages;
+using WaterZen.Telegram.Application.Services.Interfaces;
 
 namespace WaterZen.Telegram.Application.Services.Impl
 {
-    internal class DeviceData
-    {
-        public DateTime Time { get; set; }
-        public ATC53305e ATC53305e { get; set; }
-    }
-
-    internal class ATC53305e
-    {
-        public decimal Temperature { get; set; }
-        public decimal Humidity { get; set; }
-    }
-
     internal class MQTTService : IMQTTService
     {
         private readonly string? _server;
         private readonly string? _topic;
-        private readonly IMediator _mediator;
+        private readonly ShowerService _showerService;
 
-        public MQTTService(IConfiguration configuration, IMediator mediator)
+        public MQTTService(IConfiguration configuration, ShowerService showerService)
         {
             _server = configuration.GetValue<string>("MQTT:Server");
             _topic = configuration.GetValue<string>("MQTT:Topic");
-            _mediator = mediator;
+            _showerService = showerService;
         }
 
         public async Task Listen(CancellationToken cancellationToken)
@@ -49,14 +36,17 @@ namespace WaterZen.Telegram.Application.Services.Impl
 
                 if (e.ApplicationMessage != null)
                 {
-                    var data = JsonSerializer.Deserialize<DeviceData>(e.ApplicationMessage.Payload);
+                    var data = JsonSerializer.Deserialize<DeviceData>(e.ApplicationMessage.PayloadSegment);
                     if (data != null)
                     {
-                        _mediator.Send(new EnvironmentData
+                        _showerService.CheckClosingSession();
+                        if (!_showerService.IsSessionActive)
                         {
-                            Temperature = data.ATC53305e.Temperature,
-                            Humidity = data.ATC53305e.Humidity
-                        });
+                            _showerService.StartSession();
+                        }
+
+                        _showerService.AddFlowRate(data.FlowRate);
+                        _showerService.AddTemperature(data.Temperature);
                     }
                 }
 
@@ -74,6 +64,13 @@ namespace WaterZen.Telegram.Application.Services.Impl
                 .Build();
 
             await mqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
+        }
+
+        private class DeviceData
+        {
+            public bool WaterOn { get; set; }
+            public decimal Temperature { get; set; }
+            public decimal FlowRate { get; set; }
         }
     }
 }

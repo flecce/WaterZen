@@ -4,7 +4,7 @@ using WaterZen.Telegram.Application.Services.Interfaces;
 
 namespace WaterZen.Telegram.Application.Mediator.Handler
 {
-    internal class EnvironmentDataHandler : IRequestHandler<EnvironmentData, bool>
+    internal class EnvironmentDataHandler : IRequestHandler<WaterData, bool>
     {
         private readonly IBotService _botService;
 
@@ -13,9 +13,10 @@ namespace WaterZen.Telegram.Application.Mediator.Handler
             _botService = botService;
         }
 
-        public async Task<bool> Handle(EnvironmentData request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(WaterData request, CancellationToken cancellationToken)
         {
-            await _botService.SendText(request.Temperature.ToString());
+            await _botService.SendText($"Temperature: {request.Temperature.ToString()}, Humidity: {request.Humidity.ToString()}");
+
             return true;
         }
     }

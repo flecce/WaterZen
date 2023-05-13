@@ -4,11 +4,11 @@ using System.Runtime.Serialization;
 namespace WaterZen.Telegram.Application.Mediator.Messages
 {
     [DataContract]
-    public class EnvironmentData : IRequest<bool>
+    public class WaterData : IRequest<bool>
     {
         [DataMember]
         public decimal Temperature { get; set; }
         [DataMember]
-        public decimal Humidity { get; set; }
+        public decimal FlowRate { get; set; }
     }
 }
