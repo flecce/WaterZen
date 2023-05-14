@@ -65,7 +65,7 @@ namespace WaterZenSimulator.Telegram
                     {
                         var data = new WaterData
                         {
-                            FlowRate = r.Next(3, 10),
+                            FlowRate = (float) r.NextDouble(),
                             Temperature = r.Next(40, 50),
                             WaterOn = true
                         };
