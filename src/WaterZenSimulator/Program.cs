@@ -65,7 +65,7 @@ namespace WaterZenSimulator.Telegram
                     {
                         var data = new WaterData
                         {
-                            FlowRate = (float) r.NextDouble(),
+                            FlowRate = (float) r.Next(20, 30) / 100L,
                             Temperature = r.Next(40, 50),
                             WaterOn = true
                         };
@@ -85,7 +85,7 @@ namespace WaterZenSimulator.Telegram
 
                         Console.WriteLine($"Scenario acqua chiusa: {JsonSerializer.Serialize(data)}");
                     }
-                    await Task.Delay(500);
+                    await Task.Delay(1000);
                 }
             });
         }

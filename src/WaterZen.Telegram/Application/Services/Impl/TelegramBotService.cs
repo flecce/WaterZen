@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using System.Collections;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
@@ -65,7 +64,6 @@ namespace WaterZen.Telegram.Application.Services.Impl
 
             var chatId = message.Chat.Id;
 
-
             if (messageText.StartsWith("/mychatid"))
             {
                 await botClient.SendTextMessageAsync(
@@ -93,27 +91,40 @@ namespace WaterZen.Telegram.Application.Services.Impl
             if (_botClient == null)
             {
                 return;
-            }            
+            }
 
-            using (Stream tempStream = new MemoryStream(ChartHelper.CreateGraph(session.Temperatures.Select(x => x.Item2).ToArray())))
-            using (Stream flowRateStream = new MemoryStream(ChartHelper.CreateGraph(session.FlowRates.Select(x => x.Item2).ToArray())))
+            using (Stream tempStream = new MemoryStream(ChartHelper.CreateGraph(session.Temperatures.Select(x => x.Item2).ToArray(), "Temperature")))
+            using (Stream flowRateStream = new MemoryStream(ChartHelper.CreateGraph(session.FlowRates.Select(x => x.Item2).ToArray(), "Flow Rate")))
             {
                 foreach (var chatId in _chatIds)
                 {
-                    await _botClient.SendTextMessageAsync(chatId, GetMessage(session), parseMode: ParseMode.Markdown);
-                    
+                    await _botClient.SendTextMessageAsync(
+                        chatId,
+                        GetMessage(session),
+                        parseMode: ParseMode.Markdown);
+
                     await _botClient.SendPhotoAsync(chatId, InputFile.FromStream(tempStream));
                     await _botClient.SendPhotoAsync(chatId, InputFile.FromStream(flowRateStream));
+
+                    tempStream.Seek(0, SeekOrigin.Begin);
+                    flowRateStream.Seek(0, SeekOrigin.Begin);
                 }
             }
         }
 
         private string GetMessage(ShowerSession session)
         {
+            var dollar = char.ConvertFromUtf32(0x1F4B8);
+            var candy = char.ConvertFromUtf32(0x1F36C);
+            var water = char.ConvertFromUtf32(0x1F6B0);
+            var co2 = char.ConvertFromUtf32(0x1F4A8);
+
             return $"" +
-                $"- Hai consumato {session.FlowRates.Sum(x => x.Item2).ToString()} litri d'acqua" +
-                $"- Hai emesso {(session.EndDate - session.StartDate).TotalMinutes * 50} grammi di CO2" +
-                $"- Ti è costato {((session.EndDate - session.StartDate).TotalMinutes) * 0.0025} euro";
+                $"La tua doccia è durata {TimeSpan.FromMinutes((session.EndDate - session.StartDate).TotalMinutes).ToString(@"hh\:mm\:ss")} minuti:\r\n" +
+                $"- {water} Hai consumato {(int)session.FlowRates.Sum(x => x.Item2)} litri d'acqua\r\n" +
+                $"- {co2} Hai emesso {(int)(session.EndDate - session.StartDate).TotalSeconds} grammi di CO2\r\n" +
+                $"- {candy} La doccia ti è costata {Math.Round(((session.EndDate - session.StartDate).TotalSeconds) * 0.0001 / 0.10, 1)} goleador";
+                //$"- {dollar} Ti è costato {Math.Round(((session.EndDate - session.StartDate).TotalMinutes) * 0.0025, 4)} euro\r\n";
         }
     }
 }
