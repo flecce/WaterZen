@@ -120,10 +120,10 @@ namespace WaterZen.Telegram.Application.Services.Impl
             var co2 = char.ConvertFromUtf32(0x1F4A8);
 
             return $"" +
-                $"La tua doccia è durata {TimeSpan.FromMinutes((session.EndDate - session.StartDate).TotalMinutes).ToString(@"hh\:mm\:ss")} minuti:\r\n" +
+                $"La tua doccia è durata {TimeSpan.FromSeconds((session.EndDate - session.StartDate).TotalSeconds).ToString(@"hh\:mm\:ss")} minuti:\r\n" +
                 $"- {water} Hai consumato {(int)session.FlowRates.Sum(x => x.Item2)} litri d'acqua\r\n" +
-                $"- {co2} Hai emesso {(int)(session.EndDate - session.StartDate).TotalSeconds} grammi di CO2\r\n" +
-                $"- {candy} La doccia ti è costata {Math.Round(((session.EndDate - session.StartDate).TotalSeconds) * 0.0001 / 0.10, 1)} goleador";
+                $"- {co2} Hai emesso {(int)(session.EndDate - session.StartDate).TotalSeconds * 0.70} grammi di CO2\r\n" +
+                $"- {candy} La doccia ti è costata {Math.Round(((session.EndDate - session.StartDate).TotalSeconds) * 0.0005 / 0.10, 1)} goleador";
                 //$"- {dollar} Ti è costato {Math.Round(((session.EndDate - session.StartDate).TotalMinutes) * 0.0025, 4)} euro\r\n";
         }
     }
