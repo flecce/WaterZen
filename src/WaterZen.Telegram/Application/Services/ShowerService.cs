@@ -43,9 +43,11 @@ namespace WaterZen.Telegram.Application.Services
                 if (lastDateTime != null && DateTime.Now.Subtract(lastDateTime.Value) > new TimeSpan(0, 0, 10))
                 {
                     IsSessionActive = false;
-                    CurrentShowerSession?.EndSession();
-
-                    _mediator.Send(CurrentShowerSession);
+                    if (CurrentShowerSession != null)
+                    {
+                        CurrentShowerSession?.EndSession();
+                        _mediator.Send(CurrentShowerSession);
+                    }
                 }
             }
         }

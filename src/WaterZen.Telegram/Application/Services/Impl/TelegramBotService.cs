@@ -65,13 +65,14 @@ namespace WaterZen.Telegram.Application.Services.Impl
 
             var chatId = message.Chat.Id;
 
-            //Console.WriteLine($"Received a '{messageText}' message in chat {chatId}.");
 
-            // Echo received message text
-            Message sentMessage = await botClient.SendTextMessageAsync(
-                chatId: chatId,
-                text: "Your chat ID:\n" + chatId,
-                cancellationToken: cancellationToken);
+            if (messageText.StartsWith("/mychatid"))
+            {
+                await botClient.SendTextMessageAsync(
+                    chatId: chatId,
+                    text: "Your chat ID:\n" + chatId,
+                    cancellationToken: cancellationToken);
+            }
         }
 
         Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
@@ -94,14 +95,25 @@ namespace WaterZen.Telegram.Application.Services.Impl
                 return;
             }            
 
-            using (Stream stream = new MemoryStream(ChartHelper.CreateGraph(session.Temperatures.Select(x => x.Item2).ToArray())))
+            using (Stream tempStream = new MemoryStream(ChartHelper.CreateGraph(session.Temperatures.Select(x => x.Item2).ToArray())))
+            using (Stream flowRateStream = new MemoryStream(ChartHelper.CreateGraph(session.FlowRates.Select(x => x.Item2).ToArray())))
             {
                 foreach (var chatId in _chatIds)
                 {
-                    await _botClient.SendPhotoAsync(chatId, InputFile.FromStream(stream));
-                    //await _botClient.SendTextMessageAsync(chatId, text);
+                    await _botClient.SendTextMessageAsync(chatId, GetMessage(session), parseMode: ParseMode.Markdown);
+                    
+                    await _botClient.SendPhotoAsync(chatId, InputFile.FromStream(tempStream));
+                    await _botClient.SendPhotoAsync(chatId, InputFile.FromStream(flowRateStream));
                 }
             }
+        }
+
+        private string GetMessage(ShowerSession session)
+        {
+            return $"" +
+                $"- Hai consumato {session.FlowRates.Sum(x => x.Item2).ToString()} litri d'acqua" +
+                $"- Hai emesso {(session.EndDate - session.StartDate).TotalMinutes * 50} grammi di CO2" +
+                $"- Ti è costato {((session.EndDate - session.StartDate).TotalMinutes) * 0.0025} euro";
         }
     }
 }
